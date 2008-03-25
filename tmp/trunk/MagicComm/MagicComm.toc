@@ -7,6 +7,10 @@
 ## X-Category: Miscellaneous
 ## OptionalDeps: Ace3
 ## X-Embeds: Ace3
+
 LibStub.lua
+
 embeds.xml
+
 MagicComm.lua
+Logger.lua
