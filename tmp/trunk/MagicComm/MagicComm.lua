@@ -36,6 +36,9 @@ local MagicComm = MagicComm
 
 MagicComm.commPrefix = "MagicMarkerRT"
 
+MagicComm.MAJOR_VERSION = MAJOR
+MagicComm.MINOR_VERSION = MINOR
+
 local playerName
 local listening = false
 local listeners = {}
