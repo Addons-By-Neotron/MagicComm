@@ -2,7 +2,7 @@
 ## Title: MagicComm
 ## Notes: Helper addon to allow listening in on MagicMarker mark/unmark messages
 ## Version: 1.0
-## Author: David Hedbor aka NeotTron
+## Author: NeoTron
 ## X-eMail: neotron@gmail.com
 ## X-Category: Miscellaneous
 ## OptionalDeps: Ace3
@@ -13,4 +13,3 @@ LibStub.lua
 embeds.xml
 
 MagicComm.lua
-Logger.lua
