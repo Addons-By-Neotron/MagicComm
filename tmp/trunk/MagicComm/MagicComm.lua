@@ -28,36 +28,51 @@ License:
 
 ]]
 
-local MAJOR, MINOR = "MagicComm-1.0", "$Revision$"
+local MAJOR, MINOR = "MagicComm-1.0", string.match("$Revision$", "[0-9]+")
 
-MagicComm = LibStub("AceAddon-3.0"):NewAddon("MagicComm", "AceComm-3.0", "AceSerializer-3.0")
+local MagicComm = LibStub:NewLibrary(MAJOR, MINOR)
+
+if not MagicComm then return end
+
+local C = LibStub("AceComm-3.0")
+local S = LibStub("AceSerializer-3.0")
 
 local MagicComm = MagicComm
 
-MagicComm.commPrefix = "MagicMarkerRT"
+C:Embed(MagicComm)
+S:Embed(MagicComm)
+
+local comm = {
+   MM = { ALERT = "MagicMarkerRT", BULK = "MagicMarker" },
+   MD = { ALERT = "MagicDKPRT", BULK = "MagicDKP" },
+}
 
 MagicComm.MAJOR_VERSION = MAJOR
 MagicComm.MINOR_VERSION = MINOR
 
 local playerName
-local listening = false
-local listeners = {}
+local listening = { MM = false, MD = false }
+local listeners = { MM = {}, MD = {}}
 
-function MagicComm:RegisterListener(addon)
-   if not listening then
-      self:RegisterComm(self.commPrefix, "UrgentReceive")
-      listening = true
+function MagicComm:RegisterListener(addon, prefix)
+   if not listening[prefix] then
+      self:RegisterComm(comm[prefix].ALERT, "UrgentReceive")
+      self:RegisterComm(comm[prefix].BULK, "BulkReceive")
+      listening[prefix] = true
+   end
+   if not playerName then
       playerName = UnitName("player")
    end
-   listeners[addon] = true
+   listeners[prefix][addon] = true
 end
 
-function MagicComm:UnregisterListener(addon)
-   if listening then
-      listeners[addon] = nil
-      if not next(listeners) then
-	 listening = false
-	 self:UnregisterComm(self.commPrefix)
+function MagicComm:UnregisterListener(addon, prefix)
+   if listening[prefix] then
+      listeners[prefix][addon] = nil
+      if not next(listeners[prefix]) then
+	 listening[prefix] = false
+	 self:UnregisterComm(comm[prefix].ALERT)
+	 self:UnregisterComm(comm[prefix].BULK)
       end
    end
 end
@@ -69,30 +84,67 @@ function MagicComm:UrgentReceive(prefix, encmsg, dist, sender)
    local _, message = self:Deserialize(encmsg)
    
    if not message then return end
-
-   if message.cmd == "MARK" then
-      -- data = UID
-      -- misc1 = mark
-      -- misc2 = value
-      -- misc3 = ccid
-      -- misc4 = guid
-      self:Broadcast("OnCommMark", message.misc1, message.data, message.misc2, message.misc3, message.misc4)
-   elseif message.cmd == "UNMARK" then
-      -- data = UID
-      -- misc1 = mark
-      self:Broadcast("OnCommUnmark", message.misc1, message.data)
-   elseif message.cmd == "CLEAR" then
-      -- data = { mark = uid }
-      self:Broadcast("OnCommReset", message.data)
+   if message.prefix == "MM" then
+      if message.cmd == "MARK" then
+	 -- data = UID
+	 -- misc1 = mark
+	 -- misc2 = value
+	 -- misc3 = ccid
+	 -- misc4 = guid
+	 self:Broadcast("OnCommMark", message.prefix, message.misc1, message.data, message.misc2, message.misc3, message.misc4)
+      elseif message.cmd == "UNMARK" then
+	 -- data = UID
+	 -- misc1 = mark
+	 self:Broadcast("OnCommUnmark", message.prefix, message.misc1, message.data)
+      elseif message.cmd == "CLEAR" then
+	 -- data = { mark = uid }
+	 self:Broadcast("OnCommReset", message.prefix, message.data)
+      end
+   elseif message.prefix == "MD" then
+      if message.cmd == "STANDBYCHECK" then
+	 -- data = player
+	 -- misc1 = event
+	 self:Broadcast("OnStandbyCheck", message.prefix, message.data, message.misc1)
+      elseif message.cmd == "STANDBYRESPONSE" then
+	 -- data = player
+	 -- misc1 = event
+	 self:Broadcast("OnStandbyReply", message.prefix, message.data, message.misc1)
+      elseif message.cmd == "DKP" then
+      elseif message.cmd == "BID" then
+      end
    end
 end
 
-function MagicComm:SendMessage(message)
-   self:SendCommMessage(self.commPrefix, self:Serialize(message), "RAID", nil, "ALERT")
+function MagicComm:BulkReceive(prefix, encmsg, dist, sender)
+   if sender == UnitName("player") then
+      return -- don't want my own messages!
+   end
+   local _, message = self:Deserialize(encmsg)
+   if not message then return end
+
+   if message.prefix == "MM" then
+      if message.cmd == "MOBDATA" then
+	 self:Broadcast("OnMobdataReceive", message.prefix, message.misc1, message.data, message.dbversion, sender)
+      elseif message.cmd == "TARGETS" then
+	 self:Broadcast("OnTargetReceive", message.prefix, message.data, message.dbversion, sender)
+      elseif message.cmd == "CCPRIO" then
+	 self:Broadcast("OnCCPrioReceive", message.prefix, message.data, message.dbversion, sender)
+      end
+   end
 end
 
-function MagicComm:Broadcast(command, ...)
-   for addon,_ in pairs(listeners) do
+function MagicComm:SendUrgentMessage(message, prefix, channel, recipient)
+   message.prefix = prefix
+   self:SendCommMessage(comm[prefix].ALERT, self:Serialize(message), channel or "RAID", recipient, "ALERT")
+end
+
+function MagicComm:SendBulkMessage(message, prefix, channel, recipient)
+   message.prefix = prefix
+   self:SendCommMessage(comm[prefix].BULK, self:Serialize(message), channel or "RAID", recipient, "BULK")
+end
+
+function MagicComm:Broadcast(command, prefix, ...)
+   for addon,_ in pairs(listeners[prefix]) do
       if addon[command] then
 	 addon[command](addon, ...)
       end
