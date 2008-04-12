@@ -9,7 +9,5 @@
 ## X-Embeds: Ace3
 
 LibStub.lua
-
 embeds.xml
-
-MagicComm/MagicComm.lua
+MagicComm\MagicComm.lua

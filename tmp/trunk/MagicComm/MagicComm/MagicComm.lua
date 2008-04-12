@@ -78,12 +78,21 @@ function MagicComm:UnregisterListener(addon, prefix)
 end
 
 function MagicComm:UrgentReceive(prefix, encmsg, dist, sender)
-   if sender == playerName then
-      return -- don't want my own messages!
-   end
    local _, message = self:Deserialize(encmsg)
    
    if not message then return end
+   if message.cmd == "VCHECK" then
+      self:Broadcast("VCHECK", message.prefix)
+      return;
+   elseif message.cmd == "VRESP" then
+      self:Broadcast("OnVersionResponse", message.prefix, message.data, message.misc1, message.misc2, sender)
+      return
+   end
+   
+   if sender == playerName then
+      return -- don't want my own messages!
+   end
+   
    if message.prefix == "MM" then
       if message.cmd == "MARK" then
 	 -- data = UID
@@ -143,9 +152,20 @@ function MagicComm:SendBulkMessage(message, prefix, channel, recipient)
    self:SendCommMessage(comm[prefix].BULK, self:Serialize(message), channel or "RAID", recipient, "BULK")
 end
 
+local versionMsg = {
+   cmd = "VRESP"
+}
+
+local verMsgFmt = "%s-r%s"
+
 function MagicComm:Broadcast(command, prefix, ...)
-   for addon,_ in pairs(listeners[prefix]) do
-      if addon[command] then
+   for addon,_ in pairs(listeners[prefix]) do 
+      if command == "VCHECK" then
+	 versionMsg.data = verMsgFmt:format(addon.MAJOR_VERSION or "Unknown", addon.MINOR_VERSION or "???")
+	 versionMsg.misc1 = addon.MAJOR_VERSION
+	 versionMsg.misc2 = addon.MINOR_VERSION
+	 MagicComm:SendUrgentMessage(versionMsg, prefix)
+      elseif addon[command] then
 	 addon[command](addon, ...)
       end
    end
