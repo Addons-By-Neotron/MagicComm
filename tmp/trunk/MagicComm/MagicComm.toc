@@ -12,4 +12,4 @@ LibStub.lua
 
 embeds.xml
 
-MagicComm.lua
+MagicComm/MagicComm.lua
