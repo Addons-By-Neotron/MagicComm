@@ -88,7 +88,7 @@ function MagicComm:UrgentReceive(prefix, encmsg, dist, sender)
       self:Broadcast("OnVersionResponse", message.prefix, message.data, message.misc1, message.misc2, sender)
       return
    end
-   
+   --   MagicDKP:debug("Received messsage %s [data=%s, misc1=%s]", message.cmd, tostring(message.data), tostring(message.misc1))
    if sender == playerName then
       return -- don't want my own messages!
    end
@@ -111,13 +111,12 @@ function MagicComm:UrgentReceive(prefix, encmsg, dist, sender)
       end
    elseif message.prefix == "MD" then
       if message.cmd == "STANDBYCHECK" then
-	 -- data = player
-	 -- misc1 = event
-	 self:Broadcast("OnStandbyCheck", message.prefix, message.data, message.misc1)
+	 -- data = event
+	 self:Broadcast("OnStandbyCheck", message.prefix, message.data, sender)
       elseif message.cmd == "STANDBYRESPONSE" then
 	 -- data = player
 	 -- misc1 = event
-	 self:Broadcast("OnStandbyReply", message.prefix, message.data, message.misc1)
+	 self:Broadcast("OnStandbyResponse", message.prefix, message.data, message.misc1)
       elseif message.cmd == "DKP" then
       elseif message.cmd == "BID" then
       end
