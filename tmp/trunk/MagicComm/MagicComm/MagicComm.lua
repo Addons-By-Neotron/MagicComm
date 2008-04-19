@@ -36,7 +36,6 @@ if not MagicComm then return end
 
 local C = LibStub("AceComm-3.0")
 local S = LibStub("AceSerializer-3.0")
-
 local MagicComm = MagicComm
 
 C:Embed(MagicComm)
@@ -81,29 +80,36 @@ function MagicComm:UrgentReceive(prefix, encmsg, dist, sender)
    local _, message = self:Deserialize(encmsg)
    
    if not message then return end
+
    if message.cmd == "VCHECK" then
-      self:Broadcast("VCHECK", message.prefix)
+      self:Broadcast("VCHECK", message.prefix, sender)
       return;
-   elseif message.cmd == "VRESP" then
+   elseif message.cmd == "VRESP" and message.sender == sender then
+      -- Only process version response messages if I was the sender
       self:Broadcast("OnVersionResponse", message.prefix, message.data, message.misc1, message.misc2, sender)
       return
    end
-   --   MagicDKP:debug("Received messsage %s [data=%s, misc1=%s]", message.cmd, tostring(message.data), tostring(message.misc1))
+   MagicMarker:debug("Received messsage %s [data=%s, misc1=%s]", message.cmd, tostring(message.data), tostring(message.misc1))
+
    if sender == playerName then
       return -- don't want my own messages!
    end
    
    if message.prefix == "MM" then
-      if message.cmd == "MARK" then
-	 -- data = UID
-	 -- misc1 = mark
-	 -- misc2 = value
-	 -- misc3 = ccid
-	 -- misc4 = guid
+      if message.cmd == "MARKV2" then
+	 -- data = GUID, misc1 = mark, misc2 = type
+	 self:Broadcast("OnCommMarkV2", message.prefix, message.misc1, message.data, message.misc2)
+      elseif message.cmd == "UNMARKV2" then
+	 -- data = GUID, misc1 = mark
+	 self:Broadcast("OnCommUnmarkV2", message.prefix, message.data, message.misc1)
+      elseif message.cmd == "CLEARV2" then
+	 -- data = { mark = uid }
+	 self:Broadcast("OnCommResetV2", message.prefix, message.data)
+      elseif message.cmd == "MARK" then
+	 -- data = UID, misc1 = mark, misc2 = value, misc3 = ccid, misc4 = guid
 	 self:Broadcast("OnCommMark", message.prefix, message.misc1, message.data, message.misc2, message.misc3, message.misc4)
       elseif message.cmd == "UNMARK" then
-	 -- data = UID
-	 -- misc1 = mark
+	 -- data = UID, misc1 = mark
 	 self:Broadcast("OnCommUnmark", message.prefix, message.misc1, message.data)
       elseif message.cmd == "CLEAR" then
 	 -- data = { mark = uid }
@@ -142,11 +148,14 @@ function MagicComm:BulkReceive(prefix, encmsg, dist, sender)
 end
 
 function MagicComm:SendUrgentMessage(message, prefix, channel, recipient)
+--   MagicMarker:debug("sending message %s for %s", message.cmd, prefix)
    message.prefix = prefix
    self:SendCommMessage(comm[prefix].ALERT, self:Serialize(message), channel or "RAID", recipient, "ALERT")
 end
 
 function MagicComm:SendBulkMessage(message, prefix, channel, recipient)
+--   MagicMarker:debug("sending bulk message %s for %s", message.cmd, prefix)
+
    message.prefix = prefix
    self:SendCommMessage(comm[prefix].BULK, self:Serialize(message), channel or "RAID", recipient, "BULK")
 end
@@ -158,14 +167,20 @@ local versionMsg = {
 local verMsgFmt = "%s-r%s"
 
 function MagicComm:Broadcast(command, prefix, ...)
-   for addon,_ in pairs(listeners[prefix]) do 
+--   MagicMarker:debug("command = %s, prefix = %s", command, prefix)
+   for addon in pairs(listeners[prefix]) do 
       if command == "VCHECK" then
 	 versionMsg.data = verMsgFmt:format(addon.MAJOR_VERSION or "Unknown", addon.MINOR_VERSION or "???")
 	 versionMsg.misc1 = addon.MAJOR_VERSION
 	 versionMsg.misc2 = addon.MINOR_VERSION
+	 versionMsg.sender = ...
 	 MagicComm:SendUrgentMessage(versionMsg, prefix)
       elseif addon[command] then
 	 addon[command](addon, ...)
+	 if command == "OnVersionResponse" then
+	    return
+	 end
       end
    end
 end
+
