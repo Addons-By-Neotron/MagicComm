@@ -89,7 +89,7 @@ function MagicComm:UrgentReceive(prefix, encmsg, dist, sender)
       self:Broadcast("OnVersionResponse", message.prefix, message.data, message.misc1, message.misc2, sender)
       return
    end
-   MagicMarker:debug("Received messsage %s [data=%s, misc1=%s]", message.cmd, tostring(message.data), tostring(message.misc1))
+   --   MagicMarker:debug("Received messsage %s [data=%s, misc1=%s]", message.cmd, tostring(message.data), tostring(message.misc1))
 
    if sender == playerName then
       return -- don't want my own messages!
