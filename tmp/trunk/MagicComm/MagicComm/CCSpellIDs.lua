@@ -23,8 +23,9 @@ List of spell ID's for 2.4 for all crowd control spells.
 Used for auto-learning which abilities can be used to CC a mob
 **********************************************************************
 ]]
+local comm = LibStub("MagicComm-1.0")
 
-MagicComm.spellIdToCCID = {
+comm.spellIdToCCID = {
    -- Polymorph
    [118] = 2, [12824] = 2, [12825] = 2, [12826] = 2, [28271] = 2, [28272] = 2,
 
@@ -71,5 +72,9 @@ MagicComm.spellIdToCCID = {
    
    -- Turn Evil
    [10326] = 17,
+
+   -- Blind
+   [2094] = 18,
+
 }
 
