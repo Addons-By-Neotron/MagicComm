@@ -53,7 +53,7 @@ local playerName
 local listening = { MM = false, MD = false }
 local listeners = { MM = {}, MD = {}}
 
-function MagicComm:RegisterListener(addon, prefix)
+function MagicComm:RegisterListener(addon, prefix, selfalso)
    if not listening[prefix] then
       self:RegisterComm(comm[prefix].ALERT, "UrgentReceive")
       self:RegisterComm(comm[prefix].BULK, "BulkReceive")
@@ -63,6 +63,7 @@ function MagicComm:RegisterListener(addon, prefix)
       playerName = UnitName("player")
    end
    listeners[prefix][addon] = true
+   addon.sendSelfAlso = selfalso
 end
 
 function MagicComm:UnregisterListener(addon, prefix)
@@ -86,43 +87,39 @@ function MagicComm:UrgentReceive(prefix, encmsg, dist, sender)
       return;
    elseif message.cmd == "VRESP" and message.sender == sender then
       -- Only process version response messages if I was the sender
-      self:Broadcast("OnVersionResponse", message.prefix, message.data, message.misc1, message.misc2, sender)
+      self:Broadcast("OnVersionResponse", message.prefix, nil, message.data, message.misc1, message.misc2, sender)
       return
    end
    --   MagicMarker:debug("Received messsage %s [data=%s, misc1=%s]", message.cmd, tostring(message.data), tostring(message.misc1))
 
-   if sender == playerName then
-      return -- don't want my own messages!
-   end
-   
    if message.prefix == "MM" then
       if message.cmd == "MARKV2" then
-	 -- data = GUID, misc1 = mark, misc2 = type
-	 self:Broadcast("OnCommMarkV2", message.prefix, message.misc1, message.data, message.misc2)
+	 -- data = GUID, misc1 = mark, misc2 = type, misc3 = name
+	 self:Broadcast("OnCommMarkV2", message.prefix, sender, message.misc1, message.data, message.misc2, message.misc3)
       elseif message.cmd == "UNMARKV2" then
 	 -- data = GUID, misc1 = mark
-	 self:Broadcast("OnCommUnmarkV2", message.prefix, message.data, message.misc1)
+	 self:Broadcast("OnCommUnmarkV2", message.prefix, sender, message.data, message.misc1)
       elseif message.cmd == "CLEARV2" then
 	 -- data = { mark = uid }
-	 self:Broadcast("OnCommResetV2", message.prefix, message.data)
+	 self:Broadcast("OnCommResetV2", message.prefix, sender, message.data)
       elseif message.cmd == "MARK" then
 	 -- data = UID, misc1 = mark, misc2 = value, misc3 = ccid, misc4 = guid
-	 self:Broadcast("OnCommMark", message.prefix, message.misc1, message.data, message.misc2, message.misc3, message.misc4)
+	 self:Broadcast("OnCommMark", message.prefix, sender, message.misc1, message.data, message.misc2, message.misc3, message.misc4)
       elseif message.cmd == "UNMARK" then
 	 -- data = UID, misc1 = mark
-	 self:Broadcast("OnCommUnmark", message.prefix, message.misc1, message.data)
+	 self:Broadcast("OnCommUnmark", message.prefix, sender, message.misc1, message.data)
       elseif message.cmd == "CLEAR" then
 	 -- data = { mark = uid }
-	 self:Broadcast("OnCommReset", message.prefix, message.data)
+	 self:Broadcast("OnCommReset", message.prefix, sender, message.data)
       end
    elseif message.prefix == "MD" then
       if message.cmd == "STANDBYCHECK" then
 	 -- data = event
-	 self:Broadcast("OnStandbyCheck", message.prefix, message.data, sender)
+	 self:Broadcast("OnStandbyCheck", message.prefix, sender, message.data, sender)
       elseif message.cmd == "STANDBYRESPONSE" then
 	 -- data = player
 	 -- misc1 = event
-	 self:Broadcast("OnStandbyResponse", message.prefix, message.data, message.misc1)
+	 self:Broadcast("OnStandbyResponse", message.prefix, sender, message.data, message.misc1)
       elseif message.cmd == "DKP" then
       elseif message.cmd == "BID" then
       end
@@ -130,19 +127,18 @@ function MagicComm:UrgentReceive(prefix, encmsg, dist, sender)
 end
 
 function MagicComm:BulkReceive(prefix, encmsg, dist, sender)
-   if sender == UnitName("player") then
-      return -- don't want my own messages!
-   end
    local _, message = self:Deserialize(encmsg)
    if not message then return end
 
    if message.prefix == "MM" then
       if message.cmd == "MOBDATA" then
-	 self:Broadcast("OnMobdataReceive", message.prefix, message.misc1, message.data, message.dbversion, sender)
+	 self:Broadcast("OnMobdataReceive", message.prefix, sender, message.misc1, message.data, message.dbversion, sender)
       elseif message.cmd == "TARGETS" then
-	 self:Broadcast("OnTargetReceive", message.prefix, message.data, message.dbversion, sender)
+	 self:Broadcast("OnTargetReceive", message.prefix, sender, message.data, message.dbversion, sender)
       elseif message.cmd == "CCPRIO" then
-	 self:Broadcast("OnCCPrioReceive", message.prefix, message.data, message.dbversion, sender)
+	 self:Broadcast("OnCCPrioReceive", message.prefix, sender, message.data, message.dbversion, sender)
+      elseif message.cmd == "ASSIGN" then
+	 self:Broadcast("OnAssignData", message.prefix, sender, message.data)
       end
    end
 end
@@ -165,8 +161,12 @@ local versionMsg = {
 }
 
 local verMsgFmt = "%s-r%s"
+   if sender == playerName then
+      --return -- don't want my own messages!
+   end
+   
 
-function MagicComm:Broadcast(command, prefix, ...)
+function MagicComm:Broadcast(command, prefix, sender, ...)
 --   MagicMarker:debug("command = %s, prefix = %s", command, prefix)
    for addon in pairs(listeners[prefix]) do 
       if command == "VCHECK" then
@@ -176,9 +176,11 @@ function MagicComm:Broadcast(command, prefix, ...)
 	 versionMsg.sender = ...
 	 MagicComm:SendUrgentMessage(versionMsg, prefix)
       elseif addon[command] then
-	 addon[command](addon, ...)
-	 if command == "OnVersionResponse" then
-	    return
+	 if sender ~= playerName or addon.sendSelfAlso then
+	    addon[command](addon, ...)
+	    if command == "OnVersionResponse" then
+	       return
+	    end
 	 end
       end
    end
