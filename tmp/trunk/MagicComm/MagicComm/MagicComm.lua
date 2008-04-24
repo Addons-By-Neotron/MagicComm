@@ -82,6 +82,7 @@ function MagicComm:UrgentReceive(prefix, encmsg, dist, sender)
    
    if not message then return end
 
+--   MagicMarker:debug("Received messsage %s [data=%s, misc1=%s]", message.cmd, tostring(message.data), tostring(message.misc1))
    if message.cmd == "VCHECK" then
       self:Broadcast("VCHECK", message.prefix, sender)
       return;
@@ -90,7 +91,6 @@ function MagicComm:UrgentReceive(prefix, encmsg, dist, sender)
       self:Broadcast("OnVersionResponse", message.prefix, nil, message.data, message.misc1, message.misc2, sender)
       return
    end
-   --   MagicMarker:debug("Received messsage %s [data=%s, misc1=%s]", message.cmd, tostring(message.data), tostring(message.misc1))
 
    if message.prefix == "MM" then
       if message.cmd == "MARKV2" then
@@ -173,7 +173,7 @@ function MagicComm:Broadcast(command, prefix, sender, ...)
 	 versionMsg.data = verMsgFmt:format(addon.MAJOR_VERSION or "Unknown", addon.MINOR_VERSION or "???")
 	 versionMsg.misc1 = addon.MAJOR_VERSION
 	 versionMsg.misc2 = addon.MINOR_VERSION
-	 versionMsg.sender = ...
+	 versionMsg.sender = sender
 	 MagicComm:SendUrgentMessage(versionMsg, prefix)
       elseif addon[command] then
 	 if sender ~= playerName or addon.sendSelfAlso then
