@@ -114,12 +114,13 @@ function MagicComm:UrgentReceive(prefix, encmsg, dist, sender)
       end
    elseif message.prefix == "MD" then
       if message.cmd == "STANDBYCHECK" then
-	 -- data = event
-	 self:Broadcast("OnStandbyCheck", message.prefix, sender, message.data, sender)
+	 -- data = event, misc1 == raidid
+	 self:Broadcast("OnStandbyCheck", message.prefix, sender, message.data, sender, message.misc1)
       elseif message.cmd == "STANDBYRESPONSE" then
 	 -- data = player
 	 -- misc1 = event
-	 self:Broadcast("OnStandbyResponse", message.prefix, sender, message.data, message.misc1)
+	 -- misc2 = raidid
+	 self:Broadcast("OnStandbyResponse", message.prefix, sender, message.data, message.misc1, message.misc2)
       elseif message.cmd == "DKP" then
       elseif message.cmd == "BID" then
       end
@@ -170,11 +171,13 @@ function MagicComm:Broadcast(command, prefix, sender, ...)
 --   MagicMarker:debug("command = %s, prefix = %s", command, prefix)
    for addon in pairs(listeners[prefix]) do 
       if command == "VCHECK" then
-	 versionMsg.data = verMsgFmt:format(addon.MAJOR_VERSION or "Unknown", addon.MINOR_VERSION or "???")
-	 versionMsg.misc1 = addon.MAJOR_VERSION
-	 versionMsg.misc2 = addon.MINOR_VERSION
-	 versionMsg.sender = sender
-	 MagicComm:SendUrgentMessage(versionMsg, prefix)
+	 if addon.MAJOR_VERSION then
+	    versionMsg.data = verMsgFmt:format(addon.MAJOR_VERSION, addon.MINOR_VERSION or "???")
+	    versionMsg.misc1 = addon.MAJOR_VERSION
+	    versionMsg.misc2 = addon.MINOR_VERSION
+	    versionMsg.sender = sender
+	    MagicComm:SendUrgentMessage(versionMsg, prefix)
+	 end
       elseif addon[command] then
 	 if sender ~= playerName or addon.sendSelfAlso then
 	    addon[command](addon, ...)
