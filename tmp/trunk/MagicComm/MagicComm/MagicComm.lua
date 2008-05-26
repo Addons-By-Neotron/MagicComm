@@ -52,6 +52,7 @@ MagicComm.MINOR_VERSION = MINOR
 local playerName
 local listening = { MM = false, MD = false }
 local listeners = { MM = {}, MD = {}}
+local seenVersions = {}
 
 function MagicComm:RegisterListener(addon, prefix, selfalso)
    if not listening[prefix] then
@@ -81,14 +82,22 @@ function MagicComm:UrgentReceive(prefix, encmsg, dist, sender)
    local _, message = self:Deserialize(encmsg)
    
    if not message then return end
-
---   MagicMarker:debug("Received messsage %s [data=%s, misc1=%s]", message.cmd, tostring(message.data), tostring(message.misc1))
+   
+--   MagicMarker:debug("Received messsage %s [data=%s, misc1=%s, origsender=%s, from=%s]", message.cmd, tostring(message.data), tostring(message.misc1), tostring(message.sender), sender)
    if message.cmd == "VCHECK" then
       self:Broadcast("VCHECK", message.prefix, sender)
       return;
-   elseif message.cmd == "VRESP" and message.sender == sender then
+   elseif message.cmd == "VRESP" then
+      if playerName == message.sender then
       -- Only process version response messages if I was the sender
-      self:Broadcast("OnVersionResponse", message.prefix, nil, message.data, message.misc1, message.misc2, sender)
+	 local key = message.misc1..sender
+	 if seenVersions[key] then
+	    return
+	 else
+	    seenVersions[key] = true
+	 end
+	 self:Broadcast("OnVersionResponse", message.prefix, nil, message.data, message.misc1, message.misc2, sender)
+      end
       return
    end
 
@@ -145,8 +154,13 @@ function MagicComm:BulkReceive(prefix, encmsg, dist, sender)
 end
 
 function MagicComm:SendUrgentMessage(message, prefix, channel, recipient)
---   MagicMarker:debug("sending message %s for %s", message.cmd, prefix)
+--   MagicMarker:debug("sending message %s for %s to %s", message.cmd, prefix, channel)
    message.prefix = prefix
+   if message.cmd == "VCHECK" then
+      for id in pairs(seenVersions) do
+	 seenVersions[id] = nil
+      end
+   end
    self:SendCommMessage(comm[prefix].ALERT, self:Serialize(message), channel or "RAID", recipient, "ALERT")
 end
 
@@ -168,7 +182,7 @@ local verMsgFmt = "%s-r%s"
    
 
 function MagicComm:Broadcast(command, prefix, sender, ...)
---   MagicMarker:debug("command = %s, prefix = %s", command, prefix)
+--   MagicMarker:warn("command = %s, prefix = %s, sender = %s", command, prefix, tostring(sender))
    for addon in pairs(listeners[prefix]) do 
       if command == "VCHECK" then
 	 if addon.MAJOR_VERSION then
@@ -176,7 +190,7 @@ function MagicComm:Broadcast(command, prefix, sender, ...)
 	    versionMsg.misc1 = addon.MAJOR_VERSION
 	    versionMsg.misc2 = addon.MINOR_VERSION
 	    versionMsg.sender = sender
-	    MagicComm:SendUrgentMessage(versionMsg, prefix)
+	    MagicComm:SendUrgentMessage(versionMsg, prefix, "WHISPER", sender)
 	 end
       elseif addon[command] then
 	 if sender ~= playerName or addon.sendSelfAlso then
