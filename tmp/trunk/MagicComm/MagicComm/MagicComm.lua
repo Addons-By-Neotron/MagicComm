@@ -111,15 +111,6 @@ function MagicComm:UrgentReceive(prefix, encmsg, dist, sender)
       elseif message.cmd == "CLEARV2" then
 	 -- data = { mark = uid }
 	 self:Broadcast("OnCommResetV2", message.prefix, sender, message.data)
-      elseif message.cmd == "MARK" then
-	 -- data = UID, misc1 = mark, misc2 = value, misc3 = ccid, misc4 = guid
-	 self:Broadcast("OnCommMark", message.prefix, sender, message.misc1, message.data, message.misc2, message.misc3, message.misc4)
-      elseif message.cmd == "UNMARK" then
-	 -- data = UID, misc1 = mark
-	 self:Broadcast("OnCommUnmark", message.prefix, sender, message.misc1, message.data)
-      elseif message.cmd == "CLEAR" then
-	 -- data = { mark = uid }
-	 self:Broadcast("OnCommReset", message.prefix, sender, message.data)
       end
    elseif message.prefix == "MD" then
       if message.cmd == "STANDBYCHECK" then
@@ -142,11 +133,11 @@ function MagicComm:BulkReceive(prefix, encmsg, dist, sender)
 
    if message.prefix == "MM" then
       if message.cmd == "MOBDATA" then
-	 self:Broadcast("OnMobdataReceive", message.prefix, sender, message.misc1, message.data, message.dbversion, sender)
+	 self:Broadcast("OnMobdataReceive", message.prefix, sender, message.misc1, message.data, message.dbversion)
       elseif message.cmd == "TARGETS" then
-	 self:Broadcast("OnTargetReceive", message.prefix, sender, message.data, message.dbversion, sender)
+	 self:Broadcast("OnTargetReceive", message.prefix, sender, message.data, message.dbversion)
       elseif message.cmd == "CCPRIO" then
-	 self:Broadcast("OnCCPrioReceive", message.prefix, sender, message.data, message.dbversion, sender)
+	 self:Broadcast("OnCCPrioReceive", message.prefix, sender, message.data, message.dbversion)
       elseif message.cmd == "ASSIGN" then
 	 self:Broadcast("OnAssignData", message.prefix, sender, message.data)
       end
@@ -194,7 +185,7 @@ function MagicComm:Broadcast(command, prefix, sender, ...)
 	 end
       elseif addon[command] then
 	 if sender ~= playerName or addon.sendSelfAlso then
-	    addon[command](addon, ...)
+	    addon[command](addon, ..., sender)
 	    if command == "OnVersionResponse" then
 	       return
 	    end
