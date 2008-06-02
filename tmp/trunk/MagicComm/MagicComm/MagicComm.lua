@@ -96,6 +96,7 @@ function MagicComm:UrgentReceive(prefix, encmsg, dist, sender)
 	 else
 	    seenVersions[key] = true
 	 end
+--	 MagicMarker:debug("VR: ver=%s, maj=%s, min=%s, from=%s]", tostring(message.data), tostring(message.misc1), tostring(message.misc2), sender)	 
 	 self:Broadcast("OnVersionResponse", message.prefix, nil, message.data, message.misc1, message.misc2, sender)
       end
       return
@@ -104,23 +105,23 @@ function MagicComm:UrgentReceive(prefix, encmsg, dist, sender)
    if message.prefix == "MM" then
       if message.cmd == "MARKV2" then
 	 -- data = GUID, misc1 = mark, misc2 = type, misc3 = name
-	 self:Broadcast("OnCommMarkV2", message.prefix, sender, message.misc1, message.data, message.misc2, message.misc3)
+	 self:Broadcast("OnCommMarkV2", message.prefix, sender, message.misc1, message.data, message.misc2, message.misc3, sender)
       elseif message.cmd == "UNMARKV2" then
 	 -- data = GUID, misc1 = mark
-	 self:Broadcast("OnCommUnmarkV2", message.prefix, sender, message.data, message.misc1)
+	 self:Broadcast("OnCommUnmarkV2", message.prefix, sender, message.data, message.misc1, sender)
       elseif message.cmd == "CLEARV2" then
 	 -- data = { mark = uid }
-	 self:Broadcast("OnCommResetV2", message.prefix, sender, message.data)
+	 self:Broadcast("OnCommResetV2", message.prefix, sender, message.data, sender)
       end
    elseif message.prefix == "MD" then
       if message.cmd == "STANDBYCHECK" then
 	 -- data = event, misc1 == raidid
-	 self:Broadcast("OnStandbyCheck", message.prefix, sender, message.data, sender, message.misc1)
+	 self:Broadcast("OnStandbyCheck", message.prefix, sender, message.data, sender, message.misc1, sender)
       elseif message.cmd == "STANDBYRESPONSE" then
 	 -- data = player
 	 -- misc1 = event
 	 -- misc2 = raidid
-	 self:Broadcast("OnStandbyResponse", message.prefix, sender, message.data, message.misc1, message.misc2)
+	 self:Broadcast("OnStandbyResponse", message.prefix, sender, message.data, message.misc1, message.misc2, sender)
       elseif message.cmd == "DKP" then
       elseif message.cmd == "BID" then
       end
@@ -133,13 +134,13 @@ function MagicComm:BulkReceive(prefix, encmsg, dist, sender)
 
    if message.prefix == "MM" then
       if message.cmd == "MOBDATA" then
-	 self:Broadcast("OnMobdataReceive", message.prefix, sender, message.misc1, message.data, message.dbversion)
+	 self:Broadcast("OnMobdataReceive", message.prefix, sender, message.misc1, message.data, message.dbversion, sender)
       elseif message.cmd == "TARGETS" then
-	 self:Broadcast("OnTargetReceive", message.prefix, sender, message.data, message.dbversion)
+	 self:Broadcast("OnTargetReceive", message.prefix, sender, message.data, message.dbversion, sender)
       elseif message.cmd == "CCPRIO" then
-	 self:Broadcast("OnCCPrioReceive", message.prefix, sender, message.data, message.dbversion)
+	 self:Broadcast("OnCCPrioReceive", message.prefix, sender, message.data, message.dbversion, sender)
       elseif message.cmd == "ASSIGN" then
-	 self:Broadcast("OnAssignData", message.prefix, sender, message.data)
+	 self:Broadcast("OnAssignData", message.prefix, sender, message.data, sender)
       end
    end
 end
@@ -173,7 +174,7 @@ local verMsgFmt = "%s-r%s"
    
 
 function MagicComm:Broadcast(command, prefix, sender, ...)
---   MagicMarker:warn("command = %s, prefix = %s, sender = %s", command, prefix, tostring(sender))
+   --   MagicMarker:warn("command = %s, prefix = %s, sender = %s, arg1= %s, arg2 = %s", command, prefix, tostring(sender), tostring(select(1, ...)), tostring(select(2, ...)))
    for addon in pairs(listeners[prefix]) do 
       if command == "VCHECK" then
 	 if addon.MAJOR_VERSION then
@@ -185,7 +186,7 @@ function MagicComm:Broadcast(command, prefix, sender, ...)
 	 end
       elseif addon[command] then
 	 if sender ~= playerName or addon.sendSelfAlso then
-	    addon[command](addon, ..., sender)
+	    addon[command](addon, ...)
 	    if command == "OnVersionResponse" then
 	       return
 	    end
