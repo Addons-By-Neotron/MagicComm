@@ -4,9 +4,9 @@
 ## Version: 1.0
 ## Author: NeoTron
 ## X-eMail: neotron@gmail.com
-## X-Category: Miscellaneous
-## OptionalDeps: Ace3
+## X-Category: Library
 ## X-Embeds: Ace3
+## OptionalDeps: Ace3
 
 LibStub.lua
 embeds.xml
