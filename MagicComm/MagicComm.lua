@@ -28,7 +28,7 @@ License:
 
 ]]
 
-local MAJOR, MINOR = "MagicComm-1.0", string.match("$Revision$", "[0-9]+")
+local MAJOR, MINOR = "MagicComm-1.0", 81000 + tonumber(string.match("$Revision$", "[0-9]+"))
 
 local MagicComm = LibStub:NewLibrary(MAJOR, MINOR)
 
