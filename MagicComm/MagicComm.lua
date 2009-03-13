@@ -83,7 +83,7 @@ function MagicComm:UrgentReceive(prefix, encmsg, dist, sender)
    
    if not message then return end
    
---   MagicMarker:debug("Received messsage %s [data=%s, misc1=%s, origsender=%s, from=%s]", message.cmd, tostring(message.data), tostring(message.misc1), tostring(message.sender), sender)
+   --   MagicMarker:debug("Received messsage %s [data=%s, misc1=%s, origsender=%s, from=%s]", message.cmd, tostring(message.data), tostring(message.misc1), tostring(message.sender), sender)
    if message.cmd == "VCHECK" then
       self:Broadcast("VCHECK", message.prefix, sender)
       return;
@@ -122,8 +122,14 @@ function MagicComm:UrgentReceive(prefix, encmsg, dist, sender)
 	 -- misc1 = event
 	 -- misc2 = raidid
 	 self:Broadcast("OnStandbyResponse", message.prefix, sender, message.data, message.misc1, message.misc2, sender)
-      elseif message.cmd == "DKP" then
-      elseif message.cmd == "BID" then
+      elseif message.cmd == "DKPBID" then
+	 -- data = item link
+	 -- misc1 = valid bid types
+	 self:Broadcast("OnDKPBid", message.prefix, sender, message.data, message.misc1, sender)
+      elseif message.cmd == "DKPRESPONSE" then
+	 -- data = dkp bid
+	 -- misc1 = bid type 
+	 self:Broadcast("OnDKPResponse", message.prefix, sender, message.data, message.misc1, message.misc2, message.misc3, sender)
       end
    end
 end
@@ -166,15 +172,15 @@ end
 local versionMsg = {
    cmd = "VRESP"
 }
-
 local verMsgFmt = "%s-r%s"
-   if sender == playerName then
-      --return -- don't want my own messages!
-   end
-   
 
+local selfAlsoMsgs = {
+   OnDKPBid = true,
+   OnDKPResponse = true,
+   
+}
 function MagicComm:Broadcast(command, prefix, sender, ...)
-   --   MagicMarker:warn("command = %s, prefix = %s, sender = %s, arg1= %s, arg2 = %s", command, prefix, tostring(sender), tostring(select(1, ...)), tostring(select(2, ...)))
+--   MagicMarker:warn("command = %s, prefix = %s, sender = %s, arg1= %s, arg2 = %s", command, prefix, tostring(sender), tostring(select(1, ...)), tostring(select(2, ...)))
    for addon in pairs(listeners[prefix]) do 
       if command == "VCHECK" then
 	 if addon.MAJOR_VERSION then
@@ -185,7 +191,7 @@ function MagicComm:Broadcast(command, prefix, sender, ...)
 	    MagicComm:SendUrgentMessage(versionMsg, prefix, "WHISPER", sender)
 	 end
       elseif addon[command] then
-	 if sender ~= playerName or addon.sendSelfAlso then
+	 if sender ~= playerName or addon.sendSelfAlso or selfAlsoMsgs[command] then
 	    addon[command](addon, ...)
 	    if command == "OnVersionResponse" then
 	       return
