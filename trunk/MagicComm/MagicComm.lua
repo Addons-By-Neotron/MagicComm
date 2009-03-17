@@ -54,6 +54,15 @@ local listening = { MM = false, MD = false }
 local listeners = { MM = {}, MD = {}}
 local seenVersions = {}
 
+local function debug(...)
+   if MagicMarker then
+      MagicMarker:debug(...)
+   elseif MagicDKP then
+      MagicDKP:debug(...)
+   end
+end
+   
+
 function MagicComm:RegisterListener(addon, prefix, selfalso)
    if not listening[prefix] then
       self:RegisterComm(comm[prefix].ALERT, "UrgentReceive")
@@ -83,7 +92,7 @@ function MagicComm:UrgentReceive(prefix, encmsg, dist, sender)
    
    if not message then return end
    
-   --   MagicMarker:debug("Received messsage %s [data=%s, misc1=%s, origsender=%s, from=%s]", message.cmd, tostring(message.data), tostring(message.misc1), tostring(message.sender), sender)
+--   debug("URGENT: Received messsage %s [data=%s, misc1=%s, misc2=%s, misc3=%s, misc4%s, origsender=%s, from=%s]", message.cmd, tostring(message.data), tostring(message.misc1), tostring(message.misc2), tostring(message.misc3), tostring(message.misc4), tostring(message.sender), sender)
    if message.cmd == "VCHECK" then
       self:Broadcast("VCHECK", message.prefix, sender)
       return;
@@ -96,7 +105,7 @@ function MagicComm:UrgentReceive(prefix, encmsg, dist, sender)
 	 else
 	    seenVersions[key] = true
 	 end
---	 MagicMarker:debug("VR: ver=%s, maj=%s, min=%s, from=%s]", tostring(message.data), tostring(message.misc1), tostring(message.misc2), sender)	 
+	 --	 debug("VR: ver=%s, maj=%s, min=%s, from=%s]", tostring(message.data), tostring(message.misc1), tostring(message.misc2), sender)	 
 	 self:Broadcast("OnVersionResponse", message.prefix, nil, message.data, message.misc1, message.misc2, sender)
       end
       return
@@ -130,6 +139,8 @@ function MagicComm:UrgentReceive(prefix, encmsg, dist, sender)
 	 -- data = dkp bid
 	 -- misc1 = bid type 
 	 self:Broadcast("OnDKPResponse", message.prefix, sender, message.data, message.misc1, message.misc2, message.misc3, sender)
+      elseif message.cmd == "DKPSYNC" then
+	 self:Broadcast("OnDKPSyncRequest", message.prefix, sender, message.data, message.misc1, message.misc2, message.misc3, message.misc4)
       end
    end
 end
@@ -137,6 +148,7 @@ end
 function MagicComm:BulkReceive(prefix, encmsg, dist, sender)
    local _, message = self:Deserialize(encmsg)
    if not message then return end
+--   debug("BULK: Received messsage %s:%s [data=%s, misc1=%s, misc2=%s, misc3=%s, misc4%s, origsender=%s, from=%s]", message.prefix, message.cmd, tostring(message.data), tostring(message.misc1), tostring(message.misc2), tostring(message.misc3), tostring(message.misc4), tostring(message.sender), sender)
 
    if message.prefix == "MM" then
       if message.cmd == "MOBDATA" then
@@ -148,11 +160,15 @@ function MagicComm:BulkReceive(prefix, encmsg, dist, sender)
       elseif message.cmd == "ASSIGN" then
 	 self:Broadcast("OnAssignData", message.prefix, sender, message.data, sender)
       end
+   elseif message.prefix == "MD" then
+      if message.cmd == "DKPSYNC" then
+	 self:Broadcast("OnDKPSyncRequest", message.prefix, sender, message.data, message.misc1, message.misc2, message.misc3, message.misc4)
+      end
    end
 end
 
 function MagicComm:SendUrgentMessage(message, prefix, channel, recipient)
---   MagicMarker:debug("sending message %s for %s to %s", message.cmd, prefix, channel)
+--   debug("sending message %s for %s to %s (%s)", message.cmd, prefix, channel, tostring(recipient))
    message.prefix = prefix
    if message.cmd == "VCHECK" then
       for id in pairs(seenVersions) do
@@ -163,8 +179,7 @@ function MagicComm:SendUrgentMessage(message, prefix, channel, recipient)
 end
 
 function MagicComm:SendBulkMessage(message, prefix, channel, recipient)
---   MagicMarker:debug("sending bulk message %s for %s", message.cmd, prefix)
-
+--   debug("sending message %s for %s to %s (%s)", message.cmd, prefix, tostring(channel), tostring(recipient))
    message.prefix = prefix
    self:SendCommMessage(comm[prefix].BULK, self:Serialize(message), channel or "RAID", recipient, "BULK")
 end
@@ -180,7 +195,7 @@ local selfAlsoMsgs = {
    
 }
 function MagicComm:Broadcast(command, prefix, sender, ...)
---   MagicMarker:warn("command = %s, prefix = %s, sender = %s, arg1= %s, arg2 = %s", command, prefix, tostring(sender), tostring(select(1, ...)), tostring(select(2, ...)))
+--   debug("command = %s, prefix = %s, sender = %s, arg1= %s, arg2 = %s", command, prefix, tostring(sender), tostring(select(1, ...)), tostring(select(2, ...)))
    for addon in pairs(listeners[prefix]) do 
       if command == "VCHECK" then
 	 if addon.MAJOR_VERSION then
@@ -192,6 +207,7 @@ function MagicComm:Broadcast(command, prefix, sender, ...)
 	 end
       elseif addon[command] then
 	 if sender ~= playerName or addon.sendSelfAlso or selfAlsoMsgs[command] then
+--	    debug("*** calling %s in addon %s (%s)", command, tostring(addon), type(addon))
 	    addon[command](addon, ...)
 	    if command == "OnVersionResponse" then
 	       return
