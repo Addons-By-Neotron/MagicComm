@@ -138,7 +138,7 @@ function MagicComm:UrgentReceive(prefix, encmsg, dist, sender)
       elseif message.cmd == "DKPRESPONSE" then
 	 -- data = dkp bid
 	 -- misc1 = bid type 
-	 self:Broadcast("OnDKPResponse", message.prefix, sender, message.data, message.misc1, message.misc2, message.misc3, sender)
+	 self:Broadcast("OnDKPResponse", message.prefix, sender, message.data, message.misc1, message.misc2, message.misc3)
       elseif message.cmd == "DKPSYNC" then
 	 self:Broadcast("OnDKPSyncRequest", message.prefix, sender, message.data, message.misc1, message.misc2, message.misc3, message.misc4)
       end
