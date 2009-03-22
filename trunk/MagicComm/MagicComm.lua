@@ -1,10 +1,10 @@
 --[[
-Name: MagicComm
+Name: MagicComm-1.0
 Revision: $Revision$
 Author: NeoTron (neotron@gmail.com)
 Description:
 
-  Helper addon to allow listening in on MagicMarker messages 
+  Helper library to allow listening in on MagicMarker and MagicDKP messages 
   Addons define the following callbacks (depending on data you want to receive):
 
     addon:OnCommMark(mark, uid, value, ccid, guid)
@@ -134,7 +134,7 @@ function MagicComm:UrgentReceive(prefix, encmsg, dist, sender)
       elseif message.cmd == "DKPBID" then
 	 -- data = item link
 	 -- misc1 = valid bid types
-	 self:Broadcast("OnDKPBid", message.prefix, sender, message.data, message.misc1, sender)
+	 self:Broadcast("OnDKPBid", message.prefix, sender, message.data, message.misc1, sender, message.misc2)
       elseif message.cmd == "DKPRESPONSE" then
 	 -- data = dkp bid
 	 -- misc1 = bid type 
@@ -168,7 +168,7 @@ function MagicComm:BulkReceive(prefix, encmsg, dist, sender)
 end
 
 function MagicComm:SendUrgentMessage(message, prefix, channel, recipient)
---   debug("sending message %s for %s to %s (%s)", message.cmd, prefix, channel, tostring(recipient))
+--   debug("sending message %s for %s to %s (%s)", message.cmd, prefix, tostring(channel), tostring(recipient))
    message.prefix = prefix
    if message.cmd == "VCHECK" then
       for id in pairs(seenVersions) do
@@ -216,4 +216,3 @@ function MagicComm:Broadcast(command, prefix, sender, ...)
       end
    end
 end
-
