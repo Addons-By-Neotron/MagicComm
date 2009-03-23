@@ -141,6 +141,8 @@ function MagicComm:UrgentReceive(prefix, encmsg, dist, sender)
 	 self:Broadcast("OnDKPResponse", message.prefix, sender, message.data, message.misc1, message.misc2, message.misc3)
       elseif message.cmd == "DKPSYNC" then
 	 self:Broadcast("OnDKPSyncRequest", message.prefix, sender, message.data, message.misc1, message.misc2, message.misc3, message.misc4)
+      elseif message.cmd == "DKPCLOSE" then
+	 self:Broadcast("OnDKPCancel", message.prefix, sender, message.data, sender)
       end
    end
 end
@@ -192,8 +194,9 @@ local verMsgFmt = "%s-r%s"
 local selfAlsoMsgs = {
    OnDKPBid = true,
    OnDKPResponse = true,
-   
+   OnDKPCancel = true,   
 }
+
 function MagicComm:Broadcast(command, prefix, sender, ...)
 --   debug("command = %s, prefix = %s, sender = %s, arg1= %s, arg2 = %s", command, prefix, tostring(sender), tostring(select(1, ...)), tostring(select(2, ...)))
    for addon in pairs(listeners[prefix]) do 
