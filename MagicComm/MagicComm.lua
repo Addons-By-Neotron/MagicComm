@@ -131,10 +131,15 @@ function MagicComm:UrgentReceive(prefix, encmsg, dist, sender)
 	 -- misc1 = event
 	 -- misc2 = raidid
 	 self:Broadcast("OnStandbyResponse", message.prefix, sender, message.data, message.misc1, message.misc2, sender)
+      elseif message.cmd == "DKPBALANCE" then
+	 -- data = dkp balances
+	 self:Broadcast("OnDKPBalanceResponse", message.prefix, sender, message.data)
       elseif message.cmd == "DKPBID" then
 	 -- data = item link
 	 -- misc1 = valid bid types
-	 self:Broadcast("OnDKPBid", message.prefix, sender, message.data, message.misc1, sender, message.misc2)
+	 -- misc2 = expiration time in seconds
+	 -- misc3 = optional hash with bid data (min/max/avg/count bids for item)
+	 self:Broadcast("OnDKPBid", message.prefix, sender, message.data, message.misc1, sender, message.misc2, message.misc3)
       elseif message.cmd == "DKPRESPONSE" then
 	 -- data = dkp bid
 	 -- misc1 = bid type 
@@ -194,7 +199,8 @@ local verMsgFmt = "%s-r%s"
 local selfAlsoMsgs = {
    OnDKPBid = true,
    OnDKPResponse = true,
-   OnDKPCancel = true,   
+   OnDKPCancel = true,
+   OnDKPBalanceResponse = true
 }
 
 function MagicComm:Broadcast(command, prefix, sender, ...)
