@@ -28,7 +28,7 @@ License:
 
 ]]
 
-local MAJOR, MINOR = "MagicComm-1.0", 81000 + tonumber('@project-revision@') or tonumber(("$Revision$"):match("%d+"))
+local MAJOR, MINOR = "MagicComm-1.0", 81000 + (tonumber('@project-revision@') or tonumber(("$Revision$"):match("%d+")))
 
 local MagicComm = LibStub:NewLibrary(MAJOR, MINOR)
 
