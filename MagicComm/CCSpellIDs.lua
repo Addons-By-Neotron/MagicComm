@@ -45,6 +45,8 @@ comm.spellIdToCCID = {
    -- Freezing Trap
    [3355] = 6, [14308] = 6, [14309] = 6,
 
+   -- 7 = KITE, not auto-learned
+   
    -- Mind control
    [605] = 8, [10911] = 8, [19812] = 8,
 
@@ -84,12 +86,13 @@ comm.spellIdToCCID = {
    -- Blind
    [2094] = 18,
 
+   --  19 = "burn down", not auto-learned
+   
    -- Hex
-   [51514] = 19,
+   [51514] = 20,
 
    -- Repentance
-   [20066] = 20,
-
+   [20066] = 21,
 }
 
 
