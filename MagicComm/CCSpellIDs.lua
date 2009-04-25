@@ -24,6 +24,10 @@ Used for auto-learning which abilities can be used to CC a mob
 **********************************************************************
 ]]
 local comm = LibStub("MagicComm-1.0")
+if comm.spellIdToCCID then
+   -- A newer version was already loaded, so don't "upgrade"
+   return
+end
 
 comm.spellIdToCCID = {
    -- Polymorph

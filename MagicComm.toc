@@ -2,7 +2,7 @@
 ## LoadOnDemand: 1
 ## Title: Lib: MagicComm-1.0
 ## Notes: Library handling communcation for Magic* addons
-## Version: 1.0
+## Version: 1.0.@project-revision@
 ## Author: NeoTron
 ## X-eMail: neotron@gmail.com
 ## X-Category: Library
