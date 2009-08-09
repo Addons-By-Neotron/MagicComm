@@ -34,6 +34,9 @@ local MagicComm = LibStub:NewLibrary(MAJOR, MINOR)
 
 if not MagicComm then return end
 
+
+MagicComm.upgradeDone = nil
+
 local C = LibStub("AceComm-3.0")
 local S = LibStub("AceSerializer-3.0")
 local MagicComm = MagicComm
