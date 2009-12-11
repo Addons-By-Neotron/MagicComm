@@ -1,4 +1,4 @@
-## Interface: 30200
+## Interface: 30300
 ## LoadOnDemand: 1
 ## Title: Lib: MagicComm-1.0
 ## Notes: Library handling communcation for Magic* addons
