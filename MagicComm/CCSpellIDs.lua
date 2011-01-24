@@ -94,7 +94,15 @@ comm.spellIdToCCID = {
    [20066] = 21,
 
    -- Bind Elemental
-   [76780] = 22, 
+   [76780] = 22,
+
+   -- These aren't used for Magic Marker but are here for
+   -- the duration auto scanning script. They are used by
+   -- Magic Targets.
+   -- Ring of Frost,
+   -- [82691]
+   -- Hungering Cold
+   -- [49203] 
 }
 
 
@@ -121,7 +129,8 @@ comm.spellIdToDuration = {
    [20066] = 60, 
    [28271] = 50, 
    [28272] = 50, 
-   [33786] = 6, 
+   [33786] = 6,
+   [49203] = 10,
    [50577] = 8, 
    [51514] = 60, 
    [59634] = 10, 
@@ -129,5 +138,6 @@ comm.spellIdToDuration = {
    [61305] = 50, 
    [61721] = 50, 
    [61780] = 50, 
-   [76780] = 50, 
+   [76780] = 50,
+   [82691] = 10, 
 }
