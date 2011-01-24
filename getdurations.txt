@@ -4,15 +4,20 @@ int main(int argc, array argv) {
   string spells = Stdio.read_file("MagicComm/CCSpellIDs.lua");
   array(int) spellids = ({});
   int spellid;
-  constant url = "http://www.wowhead.com/?spell=%d"; 
-  sscanf(spells, "%*s]]%s", spells);
+  constant url = "http://www.wowhead.com/spell=%d"; 
+  sscanf(spells, "%*s]]%s-- Spell durations in seconds", spells);
   write("comm.spellIdToDuration = {\n");
   mapping output = ([]);
+
   while(sscanf(spells, "%*s[%d]%s", spellid, spells) > 1) {
     //  spellids += ({spellid});
     //    write("Found spell ID %d\n", spellid);
     werror("Getting data for spell id %d...\n", spellid);
     string spelldata = Protocols.HTTP.get_url_data(sprintf(url, spellid));
+    if(!spelldata) {
+      werror("  UNKNOWN SPELL %d\n", spellid);
+      continue;
+    }
     int duration;
     //    werror("%O\n", array_sscanf(spelldata, "%sDuration<%s><%s>%d second"));
     //    exit(1);
