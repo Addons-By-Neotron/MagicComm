@@ -29,7 +29,11 @@ int main(int argc, array argv) {
       }
       output[spellid] = duration;
     } else {
-      werror("  Didn't find duration...\n");
+      if(spellid == 5782) { 
+        output[spellid] = 20; // hard coded since duratioon isn't obvious
+      } else {
+        werror("  Didn't find duration...\n");
+      }
     }
     
   }
