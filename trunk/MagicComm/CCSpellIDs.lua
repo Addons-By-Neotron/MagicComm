@@ -43,10 +43,6 @@ comm.spellIdToCCID = {
    -- Shackle
    [9484] = 4,
 
-   -- Hibernate
-   [2637] = 5,
-   [104045] = 5,  -- metamorph fear change
-
    -- Freezing Trap
    [3355] = 6, 
 
@@ -74,9 +70,6 @@ comm.spellIdToCCID = {
    -- Cyclone
    [33786] = 13,
 
-   -- Scare Beast
-   [1513] = 15,
-
    -- Seduction
    [6358] = 16,
 
@@ -94,16 +87,12 @@ comm.spellIdToCCID = {
    -- Repentance
    [20066] = 21,
 
-   -- Bind Elemental
-   [76780] = 22,
-
    -- These aren't used for Magic Marker but are here for
    -- the duration auto scanning script. They are used by
    -- Magic Targets.
    -- Ring of Frost,
    -- [82691]
 }
-
 
 -- Spell durations in seconds
 comm.spellIdToDuration = {
@@ -112,9 +101,7 @@ comm.spellIdToDuration = {
    [605] = 30,
    [710] = 30,
    [1098] = 300,
-   [1513] = 20,
    [2094] = 60,
-   [2637] = 40,
    [3355] = 60,
    [5484] = 20,
    [5782] = 20,
@@ -134,8 +121,6 @@ comm.spellIdToDuration = {
    [61305] = 50,
    [61721] = 50,
    [61780] = 50,
-   [76780] = 50,
    [82691] = 10,
    [104043] = 300,
-   [104045] = 20,
 }
