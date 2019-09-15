@@ -1,6 +1,5 @@
 --[[
 Name: MagicComm-1.0
-Revision: $Revision$
 Author: NeoTron (neotron@gmail.com)
 Description:
 
@@ -28,7 +27,7 @@ License:
 
 ]]
 
-local MAJOR, MINOR = "MagicComm-1.0", 81000 + (tonumber('@project-revision@') or tonumber(("$Revision$"):match("%d+")))
+local MAJOR, MINOR = "MagicComm-1.0", 80200
 
 local MagicComm = LibStub:NewLibrary(MAJOR, MINOR)
 
