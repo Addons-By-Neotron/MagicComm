@@ -1,5 +1,5 @@
-## Interface: 90001
-## X-Compatible-With: 90001
+## Interface: 90002
+## X-Compatible-With: 90002
 ## LoadOnDemand: 1
 ## Title: Lib: MagicComm-1.0
 ## Notes: Library handling communcation for Magic* addons
