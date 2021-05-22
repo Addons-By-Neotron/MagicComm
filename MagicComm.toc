@@ -16,4 +16,3 @@
 LibStub.lua
 embeds.xml
 MagicComm\lib.xml
-
