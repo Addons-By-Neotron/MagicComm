@@ -1,10 +1,10 @@
 #!/usr/bin/env pike
 
 int main(int argc, array argv) {
-  string spells = Stdio.read_file("MagicComm/CCSpellIDs.lua");
+  string spells = Stdio.read_file("MagicComm/CCSpellIDsClassic.lua");
   array(int) spellids = ({});
   int spellid;
-  constant url = "http://www.wowhead.com/spell=%d"; 
+  constant url = "curl -L -q https://tbc.wowhead.com/spell=%d 2>/dev/null";
   sscanf(spells, "%*s]]%s-- Spell durations in seconds", spells);
   write("comm.spellIdToDuration = {\n");
   mapping output = ([]);
@@ -13,17 +13,17 @@ int main(int argc, array argv) {
     //  spellids += ({spellid});
     //    write("Found spell ID %d\n", spellid);
     werror("Getting data for spell id %d...\n", spellid);
-    string spelldata = Protocols.HTTP.get_url_data(sprintf(url, spellid));
+    string spelldata = Process.popen(sprintf(url, spellid));
     if(!spelldata) {
       werror("  UNKNOWN SPELL %d\n", spellid);
       continue;
     }
     int duration;
-    //    werror("%O\n", array_sscanf(spelldata, "%sDuration<%s><%s>%d second"));
-    //    exit(1);
+//        werror("%O\n", array_sscanf(spelldata, "%sDuration<%s><%s>%d second"));
+  //      exit(1);
     string scale;
 
-    if(sscanf(spelldata, "%*sDuration<%*s><%*s>%d %s<", duration, scale) == 5) {
+    if(sscanf(spelldata, "%*s<th>Duration</th>%*s<%*s>%d %s<", duration, scale) == 5) {
       if(scale[..2] == "min") {
 	duration = duration * 60;
       }

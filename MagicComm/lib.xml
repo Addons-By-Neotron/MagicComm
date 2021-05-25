@@ -2,4 +2,5 @@
 ..\FrameXML\UI.xsd">
 	<Script file="MagicComm.lua"/>
 	<Script file="CCSpellIDs.lua"/>
+	<Script file="CCSpellIDsClassic.lua"/>
 </Ui>

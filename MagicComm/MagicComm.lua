@@ -27,7 +27,7 @@ License:
 
 ]]
 
-local MAJOR, MINOR = "MagicComm-1.0", 80201
+local MAJOR, MINOR = "MagicComm-1.0", 20210525
 
 local MagicComm = LibStub:NewLibrary(MAJOR, MINOR)
 
