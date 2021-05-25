@@ -89,7 +89,7 @@ comm.spellIdToCCID = {
     [2094] = 18,
 
     -- Repentance
-    [20066] = 20,
+    [20066] = 21,
 }
 
 
