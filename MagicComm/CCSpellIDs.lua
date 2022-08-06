@@ -19,7 +19,7 @@ You should have received a copy of the GNU General Public License
 along with MagicMarker.  If not, see <http://www.gnu.org/licenses/>.
 
 **********************************************************************
-List of spell ID's for 2.4 for all crowd control spells.
+List of spell ID's for Retail for all crowd control spells.
 Used for auto-learning which abilities can be used to CC a mob
 **********************************************************************
 ]]

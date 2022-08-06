@@ -19,12 +19,16 @@ You should have received a copy of the GNU General Public License
 along with MagicMarker.  If not, see <http://www.gnu.org/licenses/>.
 
 **********************************************************************
-List of spell ID's for 2.4 for all crowd control spells.
+List of spell ID's for Classic / BC for all crowd control spells.
 Used for auto-learning which abilities can be used to CC a mob
 **********************************************************************
 ]]
 
-if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then return end
+if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE or
+        (WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC and
+                LE_EXPANSION_LEVEL_CURRENT == LE_EXPANSION_NORTHREND) then
+    return
+end
 
 local comm = LibStub("MagicComm-1.0")
 if comm.upgradeDone then
