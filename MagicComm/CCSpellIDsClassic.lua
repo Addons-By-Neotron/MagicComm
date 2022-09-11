@@ -25,8 +25,8 @@ Used for auto-learning which abilities can be used to CC a mob
 ]]
 
 if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE or
-        (WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC and
-                LE_EXPANSION_LEVEL_CURRENT == LE_EXPANSION_NORTHREND) then
+        (WOW_PROJECT_ID == WOW_PROJECT_WRATH_CLASSIC and
+                LE_EXPANSION_LEVEL_CURRENT == LE_EXPANSION_WRATH_OF_THE_LICH_KING) then
     return
 end
 
