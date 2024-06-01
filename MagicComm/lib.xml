@@ -4,4 +4,5 @@
 	<Script file="CCSpellIDs.lua"/>
 	<Script file="CCSpellIDsClassic.lua"/>
 	<Script file="CCSpellIDsWrath.lua"/>
+	<Script file="CCSpellIDsCata.lua"/>
 </Ui>
