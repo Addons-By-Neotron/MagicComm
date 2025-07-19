@@ -2,11 +2,12 @@
 ## Interface-Classic: 11403
 ## Interface-BCC: 20504
 ## Interface-Cata: 40402
+## Interface-Mists: 50500
 ## X-Curse-Project-ID: 14360
 ## LoadOnDemand: 1
 ## Title: Lib: MagicComm-1.0
 ## Notes: Library handling communcation for Magic* addons
-## Version: 1.0.@project-revision@
+## Version: 1.0.@project-date-integer@
 ## Author: NeoTron
 ## X-eMail: neotron@gmail.com
 ## X-Category: Library

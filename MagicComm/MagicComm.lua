@@ -27,7 +27,9 @@ License:
 
 ]]
 
-local MAJOR, MINOR = "MagicComm-1.0", 20240724
+local MAJOR = "MagicComm-1.0"
+local MINOR = tonumber("@project-date-integer@") or tonumber(date("%Y%m%d%H%M%S"))
+
 
 local MagicComm = LibStub:NewLibrary(MAJOR, MINOR)
 

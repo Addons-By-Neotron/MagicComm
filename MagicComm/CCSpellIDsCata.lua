@@ -24,12 +24,11 @@ Used for auto-learning which abilities can be used to CC a mob
 **********************************************************************
 ]]
 
-if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then return end
+if WOW_PROJECT_ID ~= WOW_PROJECT_CLASSIC then return end
 
-if WOW_PROJECT_ID ~= WOW_PROJECT_WRATH_CLASSIC or
-        LE_EXPANSION_LEVEL_CURRENT ~= LE_EXPANSION_CATACLYSM then
-    return
-end
+local version = select(1, GetBuildInfo())
+if not version or not version:match("^4%.") then return end
+
 
 local comm = LibStub("MagicComm-1.0")
 if comm.upgradeDone then
