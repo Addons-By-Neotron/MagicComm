@@ -1,8 +1,8 @@
-## Interface: 110107
-## Interface-Classic: 11403
+## Interface: 120001
+## Interface-Classic: 50503
 ## Interface-BCC: 20504
 ## Interface-Cata: 40402
-## Interface-Mists: 50500
+## Interface-Mists: 50503
 ## X-Curse-Project-ID: 14360
 ## LoadOnDemand: 1
 ## Title: Lib: MagicComm-1.0
